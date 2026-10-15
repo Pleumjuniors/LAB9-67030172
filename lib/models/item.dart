@@ -1,0 +1,64 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class Item {
+  final int id;
+  final String title;
+  final double price;
+  final String description;
+  final String category;
+  final String imageUrl;
+  final String? sellerId;
+
+  const Item({
+    required this.id,
+    required this.title,
+    required this.price,
+    required this.description,
+    required this.category,
+    required this.imageUrl,
+    this.sellerId,
+  });
+
+  factory Item.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as int;
+    final title = json['title'] as String;
+    final price = (json['price'] as num).toDouble();
+    final description = json['description'] as String;
+    final category = json['category'] as String;
+    final imageUrl = json['image'] as String;
+
+    return Item(
+      id: id,
+      title: title,
+      price: price,
+      description: description,
+      category: category,
+      imageUrl: imageUrl,
+    );
+  }
+
+  Map<String, dynamic> toFirestore() => {
+        'title': title,
+        'price': price,
+        'description': description,
+        'category': category,
+        'imageUrl': imageUrl,
+        'sellerId': sellerId,
+      };
+
+  factory Item.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data();
+    if (data == null) throw StateError('เอกสารสินค้า ${doc.id} ไม่มีข้อมูล');
+    final itemId = int.tryParse(doc.id);
+    if (itemId == null) throw FormatException('รหัสสินค้าไม่ถูกต้อง: ${doc.id}');
+    return Item(
+      id: itemId,
+      title: data['title'] as String? ?? '',
+      price: (data['price'] as num? ?? 0).toDouble(),
+      description: data['description'] as String? ?? '',
+      category: data['category'] as String? ?? '',
+      imageUrl: data['imageUrl'] as String? ?? '',
+      sellerId: data['sellerId'] as String?,
+    );
+  }
+}
